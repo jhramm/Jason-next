@@ -3,6 +3,8 @@ import axios from "axios";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import SubHeader from "../SubHeader/SubHeader";
+import { BsFillPenFill } from "react-icons/bs";
+import { FaTrashAlt } from "react-icons/fa";
 
 export default function GetBlogs() {
   type blogType = {
@@ -48,6 +50,16 @@ export default function GetBlogs() {
                   className="pb-2"
                 />
                 <p className="mb-[30px]">{formattedDate}</p>
+                <div className="flex gap-8 p-4">
+                  <button className="flex justify-center items-center bg-[green] px-[40px] py-[20px] rounded">
+                    <BsFillPenFill className="mr-[10px]" />
+                    Edit
+                  </button>
+                  <button className="flex justify-center items-center bg-[red] px-[40px] py-[20px] rounded">
+                    <FaTrashAlt className="mr-[10px]" />
+                    Delete
+                  </button>
+                </div>
               </div>
             </>
           );

@@ -3,52 +3,62 @@
 import React, { useRef, useState } from "react";
 import SubHeader from "../SubHeader/SubHeader";
 import axios from "axios";
+import Image from "next/image";
 
 export default function AddBlogs() {
   const titleRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLTextAreaElement>(null);
-  const imageRef = useRef<HTMLInputElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [image, setImage] = useState<string | null | any>("");
 
-  const handleSubmit = async () => {
-    if (
-      !titleRef.current?.value ||
-      !contentRef.current?.value ||
-      !imageRef.current?.files?.length
-    ) {
-      setMessage("Please fill in all fields and select an image");
-      return;
+  function readFile(e: any) {
+    let files = e.target.files;
+    for (let i = 0; i < files.length; i++) {
+      (function (file) {
+        let reader = new FileReader();
+        reader.onload = () => {
+          setImage(reader.result);
+        };
+        reader.readAsDataURL(file);
+      })(files[i]);
     }
+  }
 
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
     setIsSubmitting(true);
-    const formData = new FormData();
-    formData.append("title", titleRef.current.value);
-    formData.append("content", contentRef.current.value);
-    formData.append("image", imageRef.current.files[0]);
+    const title = titleRef.current?.value;
+    const content = contentRef.current?.value;
 
-    try {
-      const response = await axios.post(
-        "http://localhost:8080/blogs",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+    const payload = {
+      title,
+      content,
+      image,
+    };
+
+    axios
+      .post("http://localhost:8080/blogs", payload)
+      .then((res) => {
+        console.log(res.data);
+
+        if (titleRef.current) {
+          titleRef.current.value = "";
         }
-      );
-      console.log("Blog Added Successfully", response.data);
-      setMessage("Blog added successfully!");
-      // Clear the form
-      titleRef.current.value = "";
-      contentRef.current.value = "";
-      imageRef.current.value = "";
-    } catch (err) {
-      console.error("Error adding blog:", err);
-      setMessage("Error adding blog. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
+        if (contentRef.current) {
+          contentRef.current.value = "";
+        }
+
+        setImage("");
+        setMessage("Blog added successfully!");
+      })
+      .catch((err) => {
+        console.log(err);
+        setMessage("Error adding blog. Please try again.");
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
   };
 
   return (
@@ -76,7 +86,15 @@ export default function AddBlogs() {
         <br />
         <br />
         <h2 className="mb-3">Upload the image for your blog: </h2>
-        <input type="file" name="file" ref={imageRef} />
+        <input type="file" name="file" onChange={readFile} />
+        <br />
+        <br />
+        {image !== "" && (
+          <center>
+            <Image src={image} alt="blog" width={200} height={200} />
+          </center>
+        )}
+
         <br />
         <br />
         <button
@@ -86,7 +104,7 @@ export default function AddBlogs() {
         >
           {isSubmitting ? "Submitting..." : "Add Blog"}
         </button>
-        {message && <p>{message}</p>}
+        {message && <p className="mt-[20px]">{message}</p>}
       </form>
     </>
   );

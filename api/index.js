@@ -39,6 +39,27 @@ app.get("/blogs", async (req, res) => {
   }
 });
 
+app.put('/blogs/:id', async (req, res) => {
+  try {
+    const _id = req.params.id;
+    const updateBlogs = await Blogs.findByIdAndUpdate(_id, req.body, { new: true });
+    res.status(200).send(updateBlogs);
+    
+  } catch (error) {
+    res.status(404).send("Blog not found");
+  }
+})
+
+app.delete('/blogs/:id', async (req, res)  => {
+  try {
+    const _id = req.params.id;
+    const deleteBlog = await Blogs.deleteOne({ _id: _id});
+    res.status(200).send(deleteBlog);
+  } catch (error) {
+    res.status(404).send("Blog not found");
+  }
+})
+
 // Blog section end
 
 app.listen(port, () => {
