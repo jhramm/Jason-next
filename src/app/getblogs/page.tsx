@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import SubHeader from "../SubHeader/SubHeader";
 import { BsFillPenFill } from "react-icons/bs";
 import { FaTrashAlt } from "react-icons/fa";
+import { useRouter } from "next/navigation";
 
 export default function GetBlogs() {
   type blogType = {
@@ -12,9 +13,11 @@ export default function GetBlogs() {
     content: string;
     image: string;
     date: number;
+    _id: number;
   };
 
   const [blogs, setBlogs] = useState<blogType[]>([]);
+  const router = useRouter();
   const getBlog = () => {
     axios
       .get("http://localhost:8080/blogs")
@@ -30,6 +33,21 @@ export default function GetBlogs() {
   useEffect(() => {
     getBlog();
   }, []);
+
+  const deleteBlog = (id: number) => {
+    axios
+      .delete("http://localhost:8080/blogs/" + id)
+      .then((res) => {
+        console.log(res);
+        setBlogs(blogs.filter((blog) => blog._id !== id));
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
+  const editBlog = (id: number) => {
+    router.push(`/editblog?id=${id}`);
+  };
 
   return (
     <>
@@ -51,11 +69,17 @@ export default function GetBlogs() {
                 />
                 <p className="mb-[30px]">{formattedDate}</p>
                 <div className="flex gap-8 p-4">
-                  <button className="flex justify-center items-center bg-[green] px-[40px] py-[20px] rounded">
+                  <button
+                    className="flex justify-center items-center bg-[green] px-[40px] py-[20px] rounded hover:bg-[#04ba04] hover:border-[2px] hover:border-[#FCC954]"
+                    onClick={() => editBlog(blog._id)}
+                  >
                     <BsFillPenFill className="mr-[10px]" />
                     Edit
                   </button>
-                  <button className="flex justify-center items-center bg-[red] px-[40px] py-[20px] rounded">
+                  <button
+                    className="flex justify-center items-center bg-[red] px-[40px] py-[20px] rounded hover:bg-[#f14848] hover:border-[2px] hover:border-[#FCC954]"
+                    onClick={() => deleteBlog(blog._id)}
+                  >
                     <FaTrashAlt className="mr-[10px]" />
                     Delete
                   </button>
