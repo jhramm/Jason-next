@@ -4,7 +4,7 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import SubHeader from "../SubHeader/SubHeader";
 import { BsFillPenFill } from "react-icons/bs";
-import { FaTrashAlt } from "react-icons/fa";
+import { FaTrashAlt, FaSearch } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 
 export default function GetBlogs() {
@@ -17,6 +17,7 @@ export default function GetBlogs() {
   };
 
   const [blogs, setBlogs] = useState<blogType[]>([]);
+  const [filterBlogs, setFilterBlogs] = useState<blogType[]>([]);
   const router = useRouter();
   const getBlog = () => {
     axios
@@ -24,6 +25,7 @@ export default function GetBlogs() {
       .then((res) => {
         console.log(res.data);
         setBlogs(res.data);
+        setFilterBlogs(res.data);
       })
       .catch((err) => {
         console.log(err);
@@ -49,9 +51,31 @@ export default function GetBlogs() {
     router.push(`/editblog?id=${id}`);
   };
 
+  const searchBar = (val: string) => {
+   const filterData = filterBlogs.filter((blog) => {
+    return blog.title.toLocaleLowerCase().includes(val.toLocaleLowerCase());
+   })
+   setBlogs([...filterData]);
+  }
+
+
+
   return (
     <>
       <SubHeader title="Get Blogs" />
+
+      <div className="relative">
+        <center>
+          <input
+            type="text"
+            placeholder="Search"
+            className="w-[60%] h-[50px] rounded-lg shadow-xl shadow-slate-500 mt-[30px] pl-[20px]"
+            onChange={(e) => searchBar(e.target.value)}
+          />
+        </center>
+        <FaSearch  className="absolute top-12 left-[75%] text-gray-400 cursor-pointer"/>
+      </div>
+
       <div className="text-center p-10 mb-[30px]">
         {blogs.map((blog) => {
           const formattedDate = new Date(blog.date).toLocaleString();
