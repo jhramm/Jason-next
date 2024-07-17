@@ -29,7 +29,14 @@ const blogsSchema = new mongoose.Schema({
     likes: {
         type: Number,
         default: 0
-    }
+    },
+
+    tags: [
+        {
+           type: String,
+           required: true
+        }
+    ]
 
 })
 const Blogs = mongoose.model('blogs', blogsSchema);

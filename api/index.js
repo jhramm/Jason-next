@@ -71,6 +71,16 @@ app.delete("/blogs/:id", async (req, res) => {
   }
 });
 
+app.get("/filterblogs/:tagsName", async (req, res) => {
+  try {
+    const tagName = req.params.tagsName;
+    const filterBlogs = await Blogs.find({ tags: {$in: [tagName]}});
+    res.status(200).send(filterBlogs);
+  } catch (error) {
+     res.status(404).send("Blog not found");
+  }
+})
+
 // Blog section end
 
 app.listen(port, () => {
