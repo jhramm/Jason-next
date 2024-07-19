@@ -71,6 +71,15 @@ export default function GetBlogs() {
     setBlogs([...filterData]);
   };
 
+  const filterByTagName = (tagNames: any) => {
+   
+    axios.get("http://localhost:8080/filterblogs/" + tagNames.value).then((res) => {
+      setBlogs(res.data);
+    }).catch(err => {
+      console.log(err);
+    });
+  }
+
   return (
     <>
       <SubHeader title="Get Blogs" />
@@ -92,6 +101,10 @@ export default function GetBlogs() {
         <Select
           options={options}
           className="w-[300px] m-auto shadow-slate-500"
+          isMulti = {true}
+          onChange={(selection) => {
+            filterByTagName(selection);
+          }}
         />
       </div>
 

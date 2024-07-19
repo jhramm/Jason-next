@@ -71,11 +71,11 @@ app.delete("/blogs/:id", async (req, res) => {
   }
 });
 
-app.get("/filterblogs/:tagsName", async (req, res) => {
+app.post("/filterblogs", async (req, res) => {
   try {
     const tagName = req.params.tagsName;
-    const filterBlogs = await Blogs.find({ tags: {$in: [tagName]}});
-    res.status(200).send(filterBlogs);
+    const blog = await Blogs.find({ tags: {$in: [tagName]}});
+    res.status(200).send(blog);
   } catch (error) {
      res.status(404).send("Blog not found");
   }
