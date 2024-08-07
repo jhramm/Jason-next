@@ -7,6 +7,7 @@ import { BsFillPenFill } from "react-icons/bs";
 import { FaTrashAlt, FaSearch } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import Select from "react-select";
+import Loader from "../../../public/images/loader.gif";
 
 export default function GetBlogs() {
   type blogType = {
@@ -31,6 +32,7 @@ export default function GetBlogs() {
 
   const [blogs, setBlogs] = useState<blogType[]>([]);
   const [filterBlogs, setFilterBlogs] = useState<blogType[]>([]);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
   const getBlog = () => {
     axios
@@ -39,9 +41,11 @@ export default function GetBlogs() {
         console.log(res.data);
         setBlogs(res.data);
         setFilterBlogs(res.data);
+        setLoading(false);
       })
       .catch((err) => {
         console.log(err);
+         setLoading(false);
       });
   };
 
@@ -72,13 +76,32 @@ export default function GetBlogs() {
   };
 
   const filterByTagName = (tagNames: any) => {
-   
-    axios.get("http://localhost:8080/filterblogs/" + tagNames.value).then((res) => {
-      setBlogs(res.data);
-    }).catch(err => {
-      console.log(err);
-    });
+  setLoading(true);
+   console.log(tagNames);
+   const tagArr = [];
+   for (let i = 0; i < tagNames.length; i++) {
+    tagArr.push(tagNames[i].value);
+   }
+    const payload = {
+      tagNames: tagArr,
+    }
+
+    if(tagArr.length > 0) {
+      axios
+        .post("http://localhost:8080/filterblogs", payload)
+        .then((res) => {
+          setBlogs(res.data);
+          setLoading(false);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    } else {
+         getBlog();
+    }
+
   }
+
 
   return (
     <>
@@ -101,63 +124,73 @@ export default function GetBlogs() {
         <Select
           options={options}
           className="w-[300px] m-auto shadow-slate-500"
-          isMulti = {true}
+          isMulti={true}
           onChange={(selection) => {
             filterByTagName(selection);
           }}
         />
       </div>
 
-      <div className="text-center p-10 mb-[30px]">
-        {blogs.map((blog) => {
-          const formattedDate = new Date(blog.date).toLocaleString();
-          return (
-            <>
-              <div className="flex items-center gap-5 flex-wrap flex-col w-[80%] bg-slate-800 m-auto mb-[30px] p-10 rounded-lg border-[10px] border-[#FCC954] text-[#FCC954]">
-                <h1 className="pb-5 text-[30px] uppercase">{blog.title}</h1>
-                <p className="pb-5">{blog.content}</p>
-                <Image
-                  src={blog.image}
-                  alt={blog.title}
-                  width={300}
-                  height={300}
-                  className="pb-2"
-                />
-                <p className="mb-[30px]">{formattedDate}</p>
+      {!loading ? (
+        <>
+          <div className="text-center p-10 mb-[30px]">
+            {blogs.map((blog) => {
+              const formattedDate = new Date(blog.date).toLocaleString();
+              return (
+                <>
+                  <div className="flex items-center gap-5 flex-wrap flex-col w-[80%] bg-slate-800 m-auto mb-[30px] p-10 rounded-lg border-[10px] border-[#FCC954] text-[#FCC954]">
+                    <h1 className="pb-5 text-[30px] uppercase">{blog.title}</h1>
+                    <p className="pb-5">{blog.content}</p>
+                    <Image
+                      src={blog.image}
+                      alt={blog.title}
+                      width={300}
+                      height={300}
+                      className="pb-2"
+                    />
+                    <p className="mb-[30px]">{formattedDate}</p>
 
-                <div className="flex gap-3">
-                  {blog.tags.map((item) => {
-                    return (
-                      <>
-                        <div className="bg-orange-500 px-[10px] py-[5px] rounded-md">
-                          <p className="text-white">{item}</p>
-                        </div>
-                      </>
-                    );
-                  })}
-                </div>
+                    <div className="flex gap-3">
+                      {blog.tags.map((item) => {
+                        return (
+                          <>
+                            <div className="bg-orange-500 px-[10px] py-[5px] rounded-md">
+                              <p className="text-white">{item}</p>
+                            </div>
+                          </>
+                        );
+                      })}
+                    </div>
 
-                <div className="flex gap-8 p-4">
-                  <button
-                    className="flex justify-center items-center bg-[green] px-[40px] py-[20px] rounded hover:bg-[#04ba04] hover:border-[2px] hover:border-[#FCC954]"
-                    onClick={() => editBlog(blog._id)}
-                  >
-                    <BsFillPenFill className="mr-[10px]" />
-                    Edit
-                  </button>
-                  <button
-                    className="flex justify-center items-center bg-[red] px-[40px] py-[20px] rounded hover:bg-[#f14848] hover:border-[2px] hover:border-[#FCC954]"
-                    onClick={() => deleteBlog(blog._id)}
-                  >
-                    <FaTrashAlt className="mr-[10px]" />
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </>
-          );
-        })}
-      </div>
+                    <div className="flex gap-8 p-4">
+                      <button
+                        className="flex justify-center items-center bg-[green] px-[40px] py-[20px] rounded hover:bg-[#04ba04] hover:border-[2px] hover:border-[#FCC954]"
+                        onClick={() => editBlog(blog._id)}
+                      >
+                        <BsFillPenFill className="mr-[10px]" />
+                        Edit
+                      </button>
+                      <button
+                        className="flex justify-center items-center bg-[red] px-[40px] py-[20px] rounded hover:bg-[#f14848] hover:border-[2px] hover:border-[#FCC954]"
+                        onClick={() => deleteBlog(blog._id)}
+                      >
+                        <FaTrashAlt className="mr-[10px]" />
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </>
+              );
+            })}
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="h-[50vh] flex justify-center items-center w-[100%]">
+            <Image src={Loader} alt="loader" />
+          </div>
+        </>
+      )}
     </>
   );
 }

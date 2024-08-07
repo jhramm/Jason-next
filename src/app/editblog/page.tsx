@@ -6,6 +6,7 @@ import axios from "axios";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
+import { allTags } from "@/constants/TagsData";
 
 
 export default function EditBlog() {
@@ -18,6 +19,7 @@ export default function EditBlog() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [image, setImage] = useState<string | null | any>("");
+  const [tags, setTags] = useState<string[]>([]);
   const [blog, setBlog] = useState<{
     title: string;
     content: string;
@@ -34,6 +36,7 @@ export default function EditBlog() {
         if (titleRef.current) titleRef.current.value = res.data.title;
         if (contentRef.current) contentRef.current.value = res.data.content;
         setImage(res.data.image);
+        setTags(res.data.tags)
       })
       .catch((e) => {
         console.log(e);
@@ -65,7 +68,7 @@ export default function EditBlog() {
     const content = contentRef.current?.value;
 
     axios
-      .put(`http://localhost:8080/blogs/${id}`, { title, content, image })
+      .put(`http://localhost:8080/blogs/${id}`, { title, content, image, tags })
       .then((res) => {
         console.log(res);
         setMessage("Blog updated successfully!");
@@ -79,6 +82,20 @@ export default function EditBlog() {
         setIsSubmitting(false);
       });
   };
+
+   
+
+   const handleTagSelect = (tagName: string, selected: boolean) => {
+     if (selected) {
+       setTags((prev) => [...prev, tagName]);
+     } else {
+       setTags((prev) => prev.filter((tags) => tags != tagName));
+     }
+   };
+
+   const handleSetSelected = (tagName: string) => {
+       return tags.includes(tagName);
+   }
 
   return (
     <div>
@@ -115,6 +132,29 @@ export default function EditBlog() {
         )}
         <br />
         <br />
+        <h2 className="my-3">Select the tags for your blog: </h2>
+        <div className="w-[80%] flex justify-between items-center gap-5 flex-wrap p-[20px] m-auto">
+          {allTags.map((item) => {
+            return (
+              <>
+                <div className="bg-orange-500 p-[15px] text-white text-center rounded-lg cursor-pointer flex gap-2 items-center">
+                  <input
+                    type="checkbox"
+                    name="tags"
+                    onChange={(e) =>
+                      handleTagSelect(item.name, e.target.checked)
+                    }
+                    checked={handleSetSelected(item.name)}
+                  />
+                  <p>{item.name}</p>
+                </div>
+              </>
+            );
+          })}
+
+         
+
+        </div>
         <button
           type="submit"
           className="w-[80%] h-[40px] bg-[#FCC954] text-[#333] font-semibold text-[18px] rounded-lg"

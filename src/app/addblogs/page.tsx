@@ -4,6 +4,7 @@ import React, { useRef, useState } from "react";
 import SubHeader from "../SubHeader/SubHeader";
 import axios from "axios";
 import Image from "next/image";
+import { allTags } from "@/constants/TagsData";
 
 export default function AddBlogs() {
   const titleRef = useRef<HTMLInputElement>(null);
@@ -111,70 +112,22 @@ export default function AddBlogs() {
         <hr />
         <h2 className="my-3">Select the tags for your blog: </h2>
         <div className="w-[80%] flex justify-between items-center gap-5 flex-wrap p-[20px] m-auto">
-          <div className="bg-orange-500 p-[15px] text-white text-center rounded-lg cursor-pointer flex gap-2 items-center">
-            <input
-              type="checkbox"
-              name="tags"
-              onChange={(e) => handleTagSelect("Technology", e.target.checked)}
-            />
-            <p>Technology</p>
-          </div>
-          <div className="bg-orange-500 p-[15px] text-white text-center rounded-lg cursor-pointer flex gap-2 items-center">
-            <input
-              type="checkbox"
-              name="tags"
-              onChange={(e) => handleTagSelect("LifeStyle", e.target.checked)}
-            />
-            <p>Life Style</p>
-          </div>
-          <div className="bg-orange-500 p-[15px] text-white text-center rounded-lg cursor-pointer flex gap-2 items-center">
-            <input
-              type="checkbox"
-              name="tags"
-              onChange={(e) => handleTagSelect("News", e.target.checked)}
-            />
-            <p>News</p>
-          </div>
-          <div className="bg-orange-500 p-[15px] text-white text-center rounded-lg cursor-pointer flex gap-2 items-center">
-            <input
-              type="checkbox"
-              name="tags"
-              onChange={(e) => handleTagSelect("CurrentAffairs", e.target.checked)}
-            />
-            <p>Current Affairs </p>
-          </div>
-          <div className="bg-orange-500 p-[15px] text-white text-center rounded-lg cursor-pointer flex gap-2 items-center">
-            <input
-              type="checkbox"
-              name="tags"
-              onChange={(e) => handleTagSelect("Music", e.target.checked)}
-            />
-            <p>Music</p>
-          </div>
-          <div className="bg-orange-500 p-[15px] text-white text-center rounded-lg cursor-pointer flex gap-2 items-center">
-            <input
-              type="checkbox"
-              name="tags"
-              onChange={(e) => handleTagSelect("TvShows", e.target.checked)}
-            />
-            <p>TV Shows</p>
-          </div>
-          <div className="bg-orange-500 p-[15px] text-white text-center rounded-lg cursor-pointer flex gap-2 items-center">
-            <input
-              type="checkbox"
-              name="tags"
-              onChange={(e) => handleTagSelect("Radio", e.target.checked)}
-            />
-            <p>Radio</p>
-          </div>
-          <div className="bg-orange-500 p-[15px] text-white text-center rounded-lg cursor-pointer flex gap-2 items-center">
-            <input
-              type="checkbox"
-              name="tags"
-              onChange={(e) => handleTagSelect("Films", e.target.checked)}
-            />
-            <p>Films</p>
-          </div>
+         {allTags.map((item) => {
+          return (
+            <>
+              <div className="bg-orange-500 p-[15px] text-white text-center rounded-lg cursor-pointer flex gap-2 items-center">
+                <input
+                  type="checkbox"
+                  name="tags"
+                  onChange={(e) =>
+                    handleTagSelect(item.name, e.target.checked)
+                  }
+                />
+                <p>{item.name}</p>
+              </div>
+            </>
+          );
+         })}
         </div>
 
         <button
