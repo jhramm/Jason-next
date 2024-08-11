@@ -1,14 +1,16 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 require("./DB/Conn");
 
 const Blogs = require("./Models/AddBlog");
+const Auth = require("./Models/Auth");
 
 let app = express();
 app.use(cors());
-app.use(express.json({limit: "5mb"}));
+app.use(express.json({ limit: "5mb" }));
 
 let port = 8080;
 
@@ -74,14 +76,51 @@ app.delete("/blogs/:id", async (req, res) => {
 app.post("/filterblogs", async (req, res) => {
   try {
     const tagNames = req.body.tagNames;
-    const blogs = await Blogs.find({ tags: {$in: tagNames}});
+    const blogs = await Blogs.find({ tags: { $in: tagNames } });
     res.status(200).send(blogs);
   } catch (error) {
-     res.status(404).send("Blog not found");
+    res.status(404).send("Blog not found");
   }
-})
+});
 
 // Blog section end
+
+// Auth Section Start
+app.post("/signup", async (req, res) => {
+  try {
+    const existingUser = await Auth.findOne({ email: req.body.email });
+
+    if (!existingUser) {
+      const newUser = new Auth(req.body);
+      await newUser.save(); 
+      res.status(200).send(newUser);
+    } else {
+      res.status(404).send("User already exists");
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+
+app.post("/signin", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const findUser = await Auth.findOne({ email: email});
+    if(findUser !== null) {
+      const matchPassword = await bcrypt.compare(password, findUser.password);
+      if(matchPassword) {
+        res.status(200).send(findUser);
+      } else {
+        res.status(404).send("Invalid password!");
+      }
+    }
+    
+  } catch (error) {
+    
+  }
+});
+// Auth Section End
 
 app.listen(port, () => {
   console.log("blog running on port " + port);
