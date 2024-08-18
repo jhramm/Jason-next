@@ -72,7 +72,7 @@ export default function EditBlog() {
       .then((res) => {
         console.log(res);
         setMessage("Blog updated successfully!");
-        router.push('/getblogs');
+        router.push('/myblogs');
       })
       .catch((err) => {
         console.error("Error updating blog:", err);

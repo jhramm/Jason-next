@@ -18,7 +18,9 @@ export default function SignIn() {
     axios.post('http://localhost:8080/signin', payload).then((res) => {
        console.log(res);
        localStorage.setItem('signin', true.toString());
-       router.push('/');
+       localStorage.setItem('blogUserId', res.data._id);
+       localStorage.setItem('username', res.data.username);
+       window.location.href = 'http://localhost:3000';
     }).catch((e) => {
        console.log(e);
     })

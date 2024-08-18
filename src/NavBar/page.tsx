@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 
 export default function NavBar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const userLoggedIn = localStorage.getItem('username');
  
 
   useEffect(() => {
@@ -37,6 +38,9 @@ export default function NavBar() {
         <Link className="links" href="/signin">
           Sign In
         </Link>
+      )}
+       {isLoggedIn && (
+         <h3 className="ml-[20px] py-[10px] px-[40px]">Hello {userLoggedIn}</h3>
       )}
     </div>
   );

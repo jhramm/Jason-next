@@ -3,22 +3,22 @@ import axios from "axios";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import SubHeader from "../SubHeader/SubHeader";
-import { BsFillPenFill } from "react-icons/bs";
-import { FaTrashAlt, FaSearch } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import Select from "react-select";
 import Loader from "../../../public/images/loader.gif";
 
-export default function GetBlogs() {
-  type blogType = {
-    title: string;
-    content: string;
-    image: string;
-    date: number;
-    _id: number;
-    tags: string[];
-  };
+type blogType = {
+  title: string;
+  content: string;
+  image: string;
+  date: number;
+  _id: number;
+  tags: string[];
+  username: string;
+};
 
+export default function GetBlogs() {
   const options = [
     {value: "Technology", label: "Technology"},
     {value: "Movies", label: "Movies"},
@@ -29,11 +29,11 @@ export default function GetBlogs() {
     {value: "TvShows", label: "TV Shows"},
     {value: "Radio", label: "Radio"},
   ]
-
   const [blogs, setBlogs] = useState<blogType[]>([]);
   const [filterBlogs, setFilterBlogs] = useState<blogType[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  
   const getBlog = () => {
     axios
       .get("http://localhost:8080/blogs")
@@ -45,7 +45,7 @@ export default function GetBlogs() {
       })
       .catch((err) => {
         console.log(err);
-         setLoading(false);
+        setLoading(false);
       });
   };
 
@@ -53,38 +53,21 @@ export default function GetBlogs() {
     getBlog();
   }, []);
 
-  const deleteBlog = (id: number) => {
-    axios
-      .delete("http://localhost:8080/blogs/" + id)
-      .then((res) => {
-        console.log(res);
-        setBlogs(blogs.filter((blog) => blog._id !== id));
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  };
-  const editBlog = (id: number) => {
-    router.push(`/editblog?id=${id}`);
-  };
-
   const searchBar = (val: string) => {
     const filterData = filterBlogs.filter((blog) => {
-      return blog.title.toLocaleLowerCase().includes(val.toLocaleLowerCase());
+      return blog.title.toLowerCase().includes(val.toLowerCase());
     });
     setBlogs([...filterData]);
   };
 
   const filterByTagName = (tagNames: any) => {
-  setLoading(true);
-   console.log(tagNames);
-   const tagArr = [];
-   for (let i = 0; i < tagNames.length; i++) {
-    tagArr.push(tagNames[i].value);
-   }
+    setLoading(true);
+    console.log(tagNames);
+    const tagArr = tagNames.map((tag: { value: string }) => tag.value);
+    
     const payload = {
       tagNames: tagArr,
-    }
+    };
 
     if(tagArr.length > 0) {
       axios
@@ -97,11 +80,9 @@ export default function GetBlogs() {
           console.log(e);
         });
     } else {
-         getBlog();
+      getBlog();
     }
-
   }
-
 
   return (
     <>
@@ -137,49 +118,35 @@ export default function GetBlogs() {
             {blogs.map((blog) => {
               const formattedDate = new Date(blog.date).toLocaleString();
               return (
-                <>
-                  <div className="flex items-center gap-5 flex-wrap flex-col w-[80%] bg-slate-800 m-auto mb-[30px] p-10 rounded-lg border-[10px] border-[#FCC954] text-[#FCC954]">
-                    <h1 className="pb-5 text-[30px] uppercase">{blog.title}</h1>
-                    <p className="pb-5">{blog.content}</p>
-                    <Image
-                      src={blog.image}
-                      alt={blog.title}
-                      width={300}
-                      height={300}
-                      className="pb-2"
-                    />
-                    <p className="mb-[30px]">{formattedDate}</p>
+                <div
+                  key={blog._id}
+                  className="flex items-center gap-5 flex-wrap flex-col w-[80%] bg-slate-800 m-auto mb-[30px] p-10 rounded-lg border-[10px] border-[#FCC954] text-[#FCC954]"
+                >
+                  <h1 className="pb-5 text-[30px] uppercase">{blog.title}</h1>
+                  <p className="pb-5">{blog.content}</p>
+                  <Image
+                    src={blog.image}
+                    alt={blog.title}
+                    width={300}
+                    height={300}
+                    className="pb-2"
+                  />
+                  <p className="mb-[30px]">{formattedDate}</p>
 
-                    <div className="flex gap-3">
-                      {blog.tags.map((item) => {
-                        return (
-                          <>
-                            <div className="bg-orange-500 px-[10px] py-[5px] rounded-md">
-                              <p className="text-white">{item}</p>
-                            </div>
-                          </>
-                        );
-                      })}
-                    </div>
-
-                    <div className="flex gap-8 p-4">
-                      <button
-                        className="flex justify-center items-center bg-[green] px-[40px] py-[20px] rounded hover:bg-[#04ba04] hover:border-[2px] hover:border-[#FCC954]"
-                        onClick={() => editBlog(blog._id)}
+                  <div className="flex gap-3">
+                    {blog.tags.map((item, index) => (
+                      <div
+                        key={index}
+                        className="bg-orange-500 px-[10px] py-[5px] rounded-md"
                       >
-                        <BsFillPenFill className="mr-[10px]" />
-                        Edit
-                      </button>
-                      <button
-                        className="flex justify-center items-center bg-[red] px-[40px] py-[20px] rounded hover:bg-[#f14848] hover:border-[2px] hover:border-[#FCC954]"
-                        onClick={() => deleteBlog(blog._id)}
-                      >
-                        <FaTrashAlt className="mr-[10px]" />
-                        Delete
-                      </button>
-                    </div>
+                        <p className="text-white">{item}</p>
+                      </div>
+                    ))}
                   </div>
-                </>
+                  <div>
+                    <h3 className="uppercase">Created By: {blog.username}</h3>
+                  </div>
+                </div>
               );
             })}
           </div>

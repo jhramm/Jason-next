@@ -13,6 +13,9 @@ export default function AddBlogs() {
   const [message, setMessage] = useState<string | null>(null);
   const [image, setImage] = useState<string | null | any>("");
 
+  const userId = localStorage.getItem("blogUserId");
+  const username = localStorage.getItem("username");
+
   function readFile(e: any) {
     let files = e.target.files;
     for (let i = 0; i < files.length; i++) {
@@ -36,7 +39,10 @@ export default function AddBlogs() {
       title,
       content,
       image,
-      tags
+      tags,
+      userId,
+      username
+
     };
 
     axios

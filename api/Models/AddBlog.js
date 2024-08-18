@@ -11,11 +11,13 @@ const blogsSchema = new mongoose.Schema({
     },
     date: {
         type: Date,
-        default: new Date()
+        default: () => new Date()
     },
     comments: [
         {
             userName: {
+            type: String,
+            required: true
             },
             comment: {
                 type: String,
@@ -36,7 +38,15 @@ const blogsSchema = new mongoose.Schema({
            type: String,
            required: true
         }
-    ]
+    ],
+    userId: {
+        type: String,
+        required: true
+    },
+    username: {
+        type: String,
+        required: true
+    }
 
 })
 const Blogs = mongoose.model('blogs', blogsSchema);

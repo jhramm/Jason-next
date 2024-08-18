@@ -117,10 +117,26 @@ app.post("/signin", async (req, res) => {
     }
     
   } catch (error) {
-    
+    res.status(500).send(error);
   }
 });
 // Auth Section End
+
+// ---------- My Blogs API ---------------
+
+app.get("/myblogs/:id", async (req, res) => {
+ try {
+  const blogs = await Blogs.find({ userId: req.params.id });
+  res.status(200).send(blogs);
+ } catch (error) {
+  res.status(500).send(error);
+ }
+})
+
+
+
+
+// ---------- My Blogs API end ---------------
 
 app.listen(port, () => {
   console.log("blog running on port " + port);
