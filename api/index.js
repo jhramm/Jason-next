@@ -131,12 +131,27 @@ app.get("/myblogs/:id", async (req, res) => {
  } catch (error) {
   res.status(500).send(error);
  }
-})
-
-
-
+});
 
 // ---------- My Blogs API end ---------------
+
+app.patch("/likes/:id", async (req, res) => {
+  try {
+    const _id = req.params.id;
+    const findBlog = await Blogs.findById(_id);
+    const updatedLikes = [...findBlog.likes, ...req.body.likes];
+    const updateBlog = await Blogs.findByIdAndUpdate(
+      _id,
+      { likes: updatedLikes },
+      { new: true }
+    );
+     res.status(200).send(updateBlog);
+    
+  } catch (error) {
+     res.status(500).send("Server error" + error);
+  }
+})
+
 
 app.listen(port, () => {
   console.log("blog running on port " + port);

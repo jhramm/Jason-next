@@ -23,9 +23,6 @@ export default function NavBar() {
       <Link className="links" href="/about">
         About
       </Link>
-      <Link className="links" href="/recipes">
-        Recipes
-      </Link>
       {isLoggedIn && (
         <Link className="links" href="/addblogs">
           Add Blog
@@ -34,6 +31,11 @@ export default function NavBar() {
       <Link className="links" href="/getblogs">
         Get Blogs
       </Link>
+      {isLoggedIn && (
+        <Link className="links" href="/myblogs">
+        My Blogs
+      </Link>
+      )}
       {!isLoggedIn && (
         <Link className="links" href="/signin">
           Sign In

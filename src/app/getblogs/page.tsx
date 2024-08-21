@@ -4,6 +4,8 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import SubHeader from "../SubHeader/SubHeader";
 import { FaSearch } from "react-icons/fa";
+import { FaThumbsUp } from "react-icons/fa6";
+import { FaThumbsDown } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import Select from "react-select";
 import Loader from "../../../public/images/loader.gif";
@@ -16,24 +18,74 @@ type blogType = {
   _id: number;
   tags: string[];
   username: string;
+  likes: number;
 };
 
 export default function GetBlogs() {
   const options = [
-    {value: "Technology", label: "Technology"},
-    {value: "Movies", label: "Movies"},
-    {value: "Music", label: "Music"},
-    {value: "CurrentAffairs", label: "Current Affairs"},
-    {value: "LifeStyle", label: "Life Style"},
-    {value: "News", label: "News"},
-    {value: "TvShows", label: "TV Shows"},
-    {value: "Radio", label: "Radio"},
-  ]
+    { value: "Technology", label: "Technology" },
+    { value: "Movies", label: "Movies" },
+    { value: "Music", label: "Music" },
+    { value: "CurrentAffairs", label: "Current Affairs" },
+    { value: "LifeStyle", label: "Life Style" },
+    { value: "News", label: "News" },
+    { value: "TvShows", label: "TV Shows" },
+    { value: "Radio", label: "Radio" },
+  ];
   const [blogs, setBlogs] = useState<blogType[]>([]);
+  const [myLike, setMyLike] = useState(false);
   const [filterBlogs, setFilterBlogs] = useState<blogType[]>([]);
   const [loading, setLoading] = useState(true);
+  const userId = localStorage.getItem("userId");
+  const id = userId;
   const router = useRouter();
-  
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:8080/blogs/" + id)
+      .then((res) => {
+        console.log(res);
+        setBlogs(res.data);
+
+        res.data.likes.forEach((item: any) => {
+          if (item.userId === id) {
+            setMyLike(true);
+          }
+        });
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  }, [id, router]);
+
+  const likeBlog = (blogId: number) => {
+    if (myLike) return;
+
+    const payload = {
+      likes: [
+        {
+          userId: localStorage.getItem("userId"),
+          liked: true,
+        },
+      ],
+    };
+
+    axios
+      .patch(`http://localhost:8080/likes/${blogId}`, payload)
+      .then((res) => {
+        
+        setBlogs((prevBlogs) =>
+          prevBlogs.map((blog) =>
+            blog._id === blogId ? { ...blog, likes: blog.likes + 1 } : blog
+          )
+        );
+        setMyLike(true);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  };
+
   const getBlog = () => {
     axios
       .get("http://localhost:8080/blogs")
@@ -64,12 +116,12 @@ export default function GetBlogs() {
     setLoading(true);
     console.log(tagNames);
     const tagArr = tagNames.map((tag: { value: string }) => tag.value);
-    
+
     const payload = {
       tagNames: tagArr,
     };
 
-    if(tagArr.length > 0) {
+    if (tagArr.length > 0) {
       axios
         .post("http://localhost:8080/filterblogs", payload)
         .then((res) => {
@@ -82,7 +134,7 @@ export default function GetBlogs() {
     } else {
       getBlog();
     }
-  }
+  };
 
   return (
     <>
@@ -145,6 +197,30 @@ export default function GetBlogs() {
                   </div>
                   <div>
                     <h3 className="uppercase">Created By: {blog.username}</h3>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => likeBlog(blog._id)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-md ${
+                        myLike
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-green-500"
+                      }`}
+                      disabled={myLike}
+                    >
+                      {myLike ? (
+                        <>
+                          <FaThumbsDown /> Liked
+                        </>
+                      ) : (
+                        <>
+                          <FaThumbsUp /> Like
+                        </>
+                      )}
+                    </button>
+                    <h3>
+                      {blog.likes} Like{blog.likes !== 1 && "s"}
+                    </h3>
                   </div>
                 </div>
               );
