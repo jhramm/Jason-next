@@ -4,9 +4,7 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import SubHeader from "../SubHeader/SubHeader";
 import { FaSearch } from "react-icons/fa";
-import { FaThumbsUp } from "react-icons/fa6";
-import { FaThumbsDown } from "react-icons/fa";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import Select from "react-select";
 import Loader from "../../../public/images/loader.gif";
 
@@ -32,58 +30,19 @@ export default function GetBlogs() {
     { value: "TvShows", label: "TV Shows" },
     { value: "Radio", label: "Radio" },
   ];
+
   const [blogs, setBlogs] = useState<blogType[]>([]);
-  const [myLike, setMyLike] = useState(false);
+  // const [myLike, setMyLike] = useState(false);
   const [filterBlogs, setFilterBlogs] = useState<blogType[]>([]);
   const [loading, setLoading] = useState(true);
-  const userId = localStorage.getItem("userId");
-  const id = userId;
-  const router = useRouter();
+  const userId = localStorage.getItem("blogUserId");
 
-  useEffect(() => {
-    axios
-      .get("http://localhost:8080/blogs/" + id)
-      .then((res) => {
-        console.log(res);
-        setBlogs(res.data);
+  // const id = userId;
 
-        res.data.likes.forEach((item: any) => {
-          if (item.userId === id) {
-            setMyLike(true);
-          }
-        });
-      })
-      .catch((e) => {
-        console.log(e);
-      });
-  }, [id, router]);
 
-  const likeBlog = (blogId: number) => {
-    if (myLike) return;
-
-    const payload = {
-      likes: [
-        {
-          userId: localStorage.getItem("userId"),
-          liked: true,
-        },
-      ],
-    };
-
-    axios
-      .patch(`http://localhost:8080/likes/${blogId}`, payload)
-      .then((res) => {
-        
-        setBlogs((prevBlogs) =>
-          prevBlogs.map((blog) =>
-            blog._id === blogId ? { ...blog, likes: blog.likes + 1 } : blog
-          )
-        );
-        setMyLike(true);
-      })
-      .catch((e) => {
-        console.log(e);
-      });
+  const getDetails = (id: any) => {
+    sessionStorage.setItem("blogId", id);
+    window.location.href = "/blogdetails";
   };
 
   const getBlog = () => {
@@ -171,6 +130,7 @@ export default function GetBlogs() {
               const formattedDate = new Date(blog.date).toLocaleString();
               return (
                 <div
+                  onClick={() => getDetails(blog._id)}
                   key={blog._id}
                   className="flex items-center gap-5 flex-wrap flex-col w-[80%] bg-slate-800 m-auto mb-[30px] p-10 rounded-lg border-[10px] border-[#FCC954] text-[#FCC954]"
                 >
@@ -198,30 +158,8 @@ export default function GetBlogs() {
                   <div>
                     <h3 className="uppercase">Created By: {blog.username}</h3>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => likeBlog(blog._id)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-md ${
-                        myLike
-                          ? "bg-gray-400 cursor-not-allowed"
-                          : "bg-green-500"
-                      }`}
-                      disabled={myLike}
-                    >
-                      {myLike ? (
-                        <>
-                          <FaThumbsDown /> Liked
-                        </>
-                      ) : (
-                        <>
-                          <FaThumbsUp /> Like
-                        </>
-                      )}
-                    </button>
-                    <h3>
-                      {blog.likes} Like{blog.likes !== 1 && "s"}
-                    </h3>
-                  </div>
+                  <p>{blog.likes.length} {blog.likes.length === 1? "Like" : "Likes"}</p>
+                  
                 </div>
               );
             })}
